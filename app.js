@@ -29,7 +29,9 @@ class TopikApp {
         // Lifetime Stats (loaded from localStorage)
         this.stats = {
             totalCorrect: 0,
-            completedBlocks: [] // list of completed block identifiers (e.g. "size_50_block_2")
+            completedBlocks: [], // list of completed block identifiers (e.g. "size_50_block_2")
+            wrongWordIds: [], // list of word IDs that user got wrong in past quizzes
+            correctWordIds: [] // list of word IDs that user got right in past quizzes
         };
     }
 
@@ -108,7 +110,13 @@ class TopikApp {
         if (savedStats) {
             try {
                 const parsed = JSON.parse(savedStats);
-                this.stats = { ...this.stats, ...parsed };
+                this.stats = { 
+                    totalCorrect: 0,
+                    completedBlocks: [],
+                    wrongWordIds: [],
+                    correctWordIds: [],
+                    ...parsed 
+                };
             } catch (e) {
                 console.error('Error parsing stats:', e);
             }
@@ -129,6 +137,21 @@ class TopikApp {
     updateStatsUI() {
         document.getElementById('stats-total-correct').innerText = this.stats.totalCorrect.toLocaleString();
         document.getElementById('stats-completed-blocks').innerText = this.stats.completedBlocks.length.toLocaleString();
+
+        const correctCount = this.stats.correctWordIds ? this.stats.correctWordIds.length : 0;
+        const wrongCount = this.stats.wrongWordIds ? this.stats.wrongWordIds.length : 0;
+
+        document.getElementById('eval-correct-count').innerText = correctCount.toLocaleString();
+        document.getElementById('eval-wrong-count').innerText = wrongCount.toLocaleString();
+
+        const actionsWrapper = document.getElementById('eval-actions-wrapper');
+        if (actionsWrapper) {
+            if (wrongCount > 0) {
+                actionsWrapper.classList.remove('hidden');
+            } else {
+                actionsWrapper.classList.add('hidden');
+            }
+        }
     }
 
     /**
@@ -418,6 +441,14 @@ class TopikApp {
             selectedBtn.classList.add('correct');
             this.score++;
             this.stats.totalCorrect++;
+            
+            // Persist word stats
+            if (!this.stats.correctWordIds) this.stats.correctWordIds = [];
+            if (!this.stats.wrongWordIds) this.stats.wrongWordIds = [];
+            if (!this.stats.correctWordIds.includes(correctWord.id)) {
+                this.stats.correctWordIds.push(correctWord.id);
+            }
+            this.stats.wrongWordIds = this.stats.wrongWordIds.filter(id => id !== correctWord.id);
             this.saveStats();
             
             // Auto advance on correct answer after 1000ms
@@ -441,6 +472,15 @@ class TopikApp {
                 word: correctWord,
                 userChoice: chosenMeaning
             });
+            
+            // Persist word stats
+            if (!this.stats.correctWordIds) this.stats.correctWordIds = [];
+            if (!this.stats.wrongWordIds) this.stats.wrongWordIds = [];
+            if (!this.stats.wrongWordIds.includes(correctWord.id)) {
+                this.stats.wrongWordIds.push(correctWord.id);
+            }
+            this.stats.correctWordIds = this.stats.correctWordIds.filter(id => id !== correctWord.id);
+            this.saveStats();
             
             // Show Next Button (user must manually proceed after a mistake)
             document.getElementById('quiz-next-btn').classList.remove('hidden');
@@ -655,6 +695,14 @@ class TopikApp {
      */
     loadStudyBlock() {
         const select = document.getElementById('study-block-select');
+        if (select.value === 'wrong_review') {
+            const wrongWords = this.words.filter(w => this.stats.wrongWordIds.includes(w.id));
+            this.studyWords = wrongWords;
+            document.getElementById('study-search-input').value = '';
+            this.renderStudyList(this.studyWords);
+            return;
+        }
+
         this.activeBlockIndex = parseInt(select.value, 10);
         
         const size = this.quizSize === 'all' ? this.words.length : this.quizSize;
@@ -943,6 +991,65 @@ class TopikApp {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * Start a quiz containing only the words answered incorrectly in the past
+     */
+    startQuizWrongWords() {
+        if (!this.stats.wrongWordIds || this.stats.wrongWordIds.length === 0) {
+            alert("Bagus sekali! Tidak ada kosakata yang salah untuk diuji.");
+            return;
+        }
+
+        this.clearSavedProgress();
+
+        // Filter database to get wrong words
+        const wrongWords = this.words.filter(w => this.stats.wrongWordIds.includes(w.id));
+        
+        this.quizWords = [...wrongWords];
+        this.shuffleArray(this.quizWords);
+
+        // Reset quiz variables
+        this.currentIndex = 0;
+        this.score = 0;
+        this.mistakenWords = [];
+        this.startTime = Date.now();
+        
+        this.quizSize = wrongWords.length;
+        this.quizOrder = 'random';
+        
+        this.saveCurrentQuizSession();
+        
+        this.showScreen('quiz');
+        this.renderQuestion();
+    }
+
+    /**
+     * Study the wrong words in Study Mode
+     */
+    studyWrongWords() {
+        if (!this.stats.wrongWordIds || this.stats.wrongWordIds.length === 0) {
+            alert("Bagus sekali! Tidak ada kosakata yang salah untuk dipelajari.");
+            return;
+        }
+
+        const wrongWords = this.words.filter(w => this.stats.wrongWordIds.includes(w.id));
+        this.studyWords = wrongWords;
+        
+        // Populate the select dropdown with a special option "Ulasan Kata Salah"
+        const select = document.getElementById('study-block-select');
+        select.innerHTML = '<option value="wrong_review" selected>Ulasan Kata Salah (' + wrongWords.length + ' kata)</option>';
+        
+        // Set size select to 'all' to show all wrong words
+        const sizeSelect = document.getElementById('study-size-select');
+        if (sizeSelect) sizeSelect.value = 'all';
+        
+        // Reset search box
+        document.getElementById('study-search-input').value = '';
+
+        this.showScreen('study');
+        this.renderStudyList(this.studyWords);
     }
 }
 

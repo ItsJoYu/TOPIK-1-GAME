@@ -78,6 +78,29 @@
                     </div>
                 </div>
 
+                <!-- EVALUASI BELAJAR SAYA -->
+                <div class="evaluation-panel card">
+                    <h3>Evaluasi Belajar Saya 📊</h3>
+                    <div class="eval-grid">
+                        <div class="eval-item">
+                            <span class="eval-num text-success" id="eval-correct-count">0</span>
+                            <span class="eval-lbl">Kosakata Dikuasai (Benar)</span>
+                        </div>
+                        <div class="eval-item">
+                            <span class="eval-num text-error" id="eval-wrong-count">0</span>
+                            <span class="eval-lbl">Perlu Ulasan (Salah)</span>
+                        </div>
+                    </div>
+                    <div class="eval-actions hidden" id="eval-actions-wrapper">
+                        <button class="btn btn-outline btn-sm" id="btn-read-wrong" onclick="app.studyWrongWords()">
+                            <span class="material-symbols-outlined">visibility</span> Baca Kata Salah
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btn-quiz-wrong" onclick="app.startQuizWrongWords()">
+                            <span class="material-symbols-outlined">quiz</span> Kuis Kata Salah
+                        </button>
+                    </div>
+                </div>
+
                 <div class="setup-card card">
                     <h3>Pengaturan Aktivitas</h3>
                     
@@ -85,6 +108,7 @@
                     <div class="setup-group">
                         <label class="setup-label">Jumlah Kata per Sesi:</label>
                         <div class="toggle-group" id="size-toggles">
+                            <button class="toggle-btn" data-size="10">10</button>
                             <button class="toggle-btn active" data-size="25">25</button>
                             <button class="toggle-btn" data-size="50">50</button>
                             <button class="toggle-btn" data-size="100">100</button>
@@ -179,6 +203,7 @@
                         <div class="control-item">
                             <label class="control-label">Tampilkan Jumlah:</label>
                             <select id="study-size-select" class="form-select" onchange="app.changeStudySize()">
+                                <option value="10">10 Kata</option>
                                 <option value="25" selected>25 Kata</option>
                                 <option value="50">50 Kata</option>
                                 <option value="100">100 Kata</option>

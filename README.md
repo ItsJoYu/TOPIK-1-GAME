@@ -34,11 +34,13 @@ Silakan centang langkah-langkah di bawah ini seiring dengan progres pengerjaan:
 - [x] **Langkah 4: Logika Permainan & Kamus Pencarian (`app.js`)**
   - [x] Mengatur pergantian layar (Lobby, Quiz, Results, Dictionary) secara mulus.
   - [x] Membuat fungsi pengacak opsi ganda (1 jawaban benar + 3 jawaban salah secara acak dari database kosakata dalam Bahasa Indonesia).
-  - [x] Menerapkan pembagian blok soal (misal per 25, 50, 100 kata) secara otomatis sesuai total kata.
+  - [x] Menerapkan pembagian blok soal (misal per 10, 25, 50, 100 kata) secara otomatis sesuai total kata.
   - [x] Menyimpan jawaban salah selama kuis berlangsung untuk ditampilkan di bagian akhir (Results Review).
   - [x] Menerapkan fitur **Auto-Save & Resume** menggunakan `localStorage`.
-  - [x] Menambahkan pemilih jumlah kosakata dinamis (25, 50, 100, Semua) langsung di layar belajar mandiri.
+  - [x] Menambahkan pemilih jumlah kosakata dinamis (10, 25, 50, 100, Semua) langsung di layar belajar mandiri.
   - [x] Membuat fungsi pencarian kosakata di kamus (mendukung pencarian berdasarkan huruf Hangeul, arti Indonesia, maupun arti Inggris).
+  - [x] Menambahkan panel **Evaluasi Belajar Saya** untuk merekam secara permanen kosakata yang berhasil dikuasai (Benar) dan perlu ulasan (Salah) di `localStorage`.
+  - [x] Menambahkan fitur kuis khusus ("Kuis Kata Salah") dan ulasan baca khusus untuk kata-kata yang salah dijawab sebelumnya agar mempermudah evaluasi mandiri.
 
 - [x] **Langkah 5: Pengujian & Finalisasi**
   - [x] Menguji pembukaan file `index.html` secara langsung (protokol `file://`) untuk memastikan tidak ada error CORS.
