@@ -864,7 +864,7 @@ input:checked + .slider:before {
     border-radius: var(--radius-sm);
     padding: 10px 16px;
     display: flex;
-    align-items: center;
+    align-items: stretch; /* Stretch children to avoid nested flex height bugs */
     justify-content: space-between;
     transition: var(--transition-smooth);
     min-height: 48px;
@@ -878,7 +878,7 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1;
+    flex-shrink: 0; /* Do not shrink Hangul or ID */
 }
 
 .study-num {
@@ -894,12 +894,16 @@ input:checked + .slider:before {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap; /* Do not wrap Hangul word */
 }
 
 .study-item-right {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex: 1; /* Take remaining space */
+    min-width: 0;
+    justify-content: flex-end;
 }
 
 .study-meaning {
@@ -911,6 +915,9 @@ input:checked + .slider:before {
     padding: 4px 8px;
     border-radius: 4px;
     user-select: none;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .study-meaning.hidden-meaning {
@@ -1128,7 +1135,7 @@ input:checked + .slider:before {
     border-radius: var(--radius-sm);
     padding: 10px 16px;
     display: flex;
-    align-items: center;
+    align-items: stretch; /* Stretch children to avoid nested flex height bugs */
     justify-content: space-between;
     transition: var(--transition-smooth);
 }
@@ -1141,7 +1148,7 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1;
+    flex-shrink: 0; /* Do not shrink Hangul or ID */
 }
 
 .dict-num {
@@ -1157,13 +1164,34 @@ input:checked + .slider:before {
     font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap; /* Do not wrap Hangul word */
+}
+
+.dict-meanings {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center; /* Center meanings vertically inside stretched container */
+    flex: 1;
+    min-width: 0;
 }
 
 .dict-meaning {
     font-size: 13px;
     color: var(--text-secondary);
     text-align: right;
-    margin-right: 8px;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.dict-meaning-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .dict-actions {
@@ -1277,11 +1305,11 @@ input:checked + .slider:before {
     }
 
     .study-item-left {
-        min-width: 0;
+        flex-shrink: 0;
     }
 
     .study-item-right {
-        flex: 1.2;
+        flex: 1;
         min-width: 0;
         justify-content: flex-end;
     }
@@ -1289,7 +1317,7 @@ input:checked + .slider:before {
     .study-meaning {
         font-size: 11.5px;
         word-break: break-word;
-        max-width: 140px;
+        max-width: 150px;
     }
 
     .study-korean-word {
@@ -1302,10 +1330,11 @@ input:checked + .slider:before {
     }
 
     .dict-info {
-        min-width: 0;
+        flex-shrink: 0;
     }
 
     .dict-meanings {
+        flex: 1;
         min-width: 0;
         margin-right: 8px !important;
     }
