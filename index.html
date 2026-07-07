@@ -61,42 +61,33 @@
                     <p>Uji kemampuan Anda pada 1.671 kosakata penting TOPIK I melalui kuis pilihan ganda atau pelajari langsung daftarnya.</p>
                 </div>
 
-                <div class="stats-panel">
-                    <div class="stat-card">
-                        <span class="material-symbols-outlined stat-icon">emoji_events</span>
-                        <div class="stat-content">
-                            <span class="stat-value" id="stats-total-correct">0</span>
-                            <span class="stat-label">Jawaban Benar</span>
+                <!-- DASBOR KEMAJUAN & EVALUASI -->
+                <div class="evaluation-panel card compact-dashboard" style="padding: 16px; margin-bottom: 16px;">
+                    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        <h3 style="margin-bottom: 0; font-size: 15px; display: flex; align-items: center; gap: 6px; font-family: var(--font-heading); font-weight: 600;">
+                            <span class="material-symbols-outlined" style="font-size: 20px; color: var(--accent-purple);">analytics</span> Evaluasi Belajar Saya
+                        </h3>
+                        <div class="lifetime-brief text-muted" style="font-size: 11px; font-weight: 500;">
+                            Jawab Benar: <span id="stats-total-correct" class="text-success" style="font-weight: 700;">0</span> | Blok Selesai: <span id="stats-completed-blocks" style="font-weight: 700; color: var(--accent-purple);">0</span>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <span class="material-symbols-outlined stat-icon">task_alt</span>
-                        <div class="stat-content">
-                            <span class="stat-value" id="stats-completed-blocks">0</span>
-                            <span class="stat-label">Blok Selesai</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EVALUASI BELAJAR SAYA -->
-                <div class="evaluation-panel card">
-                    <h3>Evaluasi Belajar Saya 📊</h3>
-                    <div class="eval-grid">
+                    
+                    <div class="eval-grid" style="margin-bottom: 4px; gap: 8px; padding: 4px 8px; background: transparent; border: none;">
                         <div class="eval-item">
-                            <span class="eval-num text-success" id="eval-correct-count">0</span>
-                            <span class="eval-lbl">Kosakata Dikuasai (Benar)</span>
+                            <span class="eval-num text-success" id="eval-correct-count" style="font-size: 22px;">0</span>
+                            <span class="eval-lbl" style="font-size: 10px;">Kosakata Dikuasai (Benar)</span>
+                            <button class="btn btn-outline btn-xs" style="margin-top: 6px;" onclick="app.studyCorrectWords()">Lihat Daftar</button>
                         </div>
-                        <div class="eval-item">
-                            <span class="eval-num text-error" id="eval-wrong-count">0</span>
-                            <span class="eval-lbl">Perlu Ulasan (Salah)</span>
+                        <div class="eval-item" style="border-left: 1px solid var(--border-color);">
+                            <span class="eval-num text-error" id="eval-wrong-count" style="font-size: 22px;">0</span>
+                            <span class="eval-lbl" style="font-size: 10px;">Perlu Ulasan (Salah)</span>
+                            <button class="btn btn-outline btn-xs" style="margin-top: 6px;" onclick="app.studyWrongWords()">Lihat Daftar</button>
                         </div>
                     </div>
-                    <div class="eval-actions hidden" id="eval-actions-wrapper">
-                        <button class="btn btn-outline btn-sm" id="btn-read-wrong" onclick="app.studyWrongWords()">
-                            <span class="material-symbols-outlined">visibility</span> Baca Kata Salah
-                        </button>
-                        <button class="btn btn-primary btn-sm" id="btn-quiz-wrong" onclick="app.startQuizWrongWords()">
-                            <span class="material-symbols-outlined">quiz</span> Kuis Kata Salah
+                    
+                    <div class="eval-actions hidden" id="eval-actions-wrapper" style="margin-top: 8px;">
+                        <button class="btn btn-primary btn-sm btn-full" id="btn-quiz-wrong" onclick="app.startQuizWrongWords()">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">quiz</span> Mulai Kuis dari Kata Salah
                         </button>
                     </div>
                 </div>

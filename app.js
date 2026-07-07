@@ -702,6 +702,13 @@ class TopikApp {
             this.renderStudyList(this.studyWords);
             return;
         }
+        if (select.value === 'correct_review') {
+            const correctWords = this.words.filter(w => this.stats.correctWordIds.includes(w.id));
+            this.studyWords = correctWords;
+            document.getElementById('study-search-input').value = '';
+            this.renderStudyList(this.studyWords);
+            return;
+        }
 
         this.activeBlockIndex = parseInt(select.value, 10);
         
@@ -1042,6 +1049,33 @@ class TopikApp {
         select.innerHTML = '<option value="wrong_review" selected>Ulasan Kata Salah (' + wrongWords.length + ' kata)</option>';
         
         // Set size select to 'all' to show all wrong words
+        const sizeSelect = document.getElementById('study-size-select');
+        if (sizeSelect) sizeSelect.value = 'all';
+        
+        // Reset search box
+        document.getElementById('study-search-input').value = '';
+
+        this.showScreen('study');
+        this.renderStudyList(this.studyWords);
+    }
+
+    /**
+     * Study the correct (mastered) words in Study Mode
+     */
+    studyCorrectWords() {
+        if (!this.stats.correctWordIds || this.stats.correctWordIds.length === 0) {
+            alert("Anda belum menguasai kosakata apapun. Selesaikan kuis untuk mulai menguasai kata!");
+            return;
+        }
+
+        const correctWords = this.words.filter(w => this.stats.correctWordIds.includes(w.id));
+        this.studyWords = correctWords;
+        
+        // Populate the select dropdown with a special option "Kosakata Dikuasai"
+        const select = document.getElementById('study-block-select');
+        select.innerHTML = '<option value="correct_review" selected>Kosakata Dikuasai (' + correctWords.length + ' kata)</option>';
+        
+        // Set size select to 'all' to show all
         const sizeSelect = document.getElementById('study-size-select');
         if (sizeSelect) sizeSelect.value = 'all';
         
