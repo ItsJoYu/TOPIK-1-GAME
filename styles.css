@@ -1212,7 +1212,7 @@ input:checked + .slider:before {
     }
     
     .stats-panel {
-        grid-template-columns: 1fr; /* Single column stats on small screens */
+        grid-template-columns: 1fr;
         gap: 10px;
     }
     
@@ -1245,6 +1245,83 @@ input:checked + .slider:before {
     
     .dictionary-list {
         max-height: calc(100vh - 300px);
+    }
+
+    /* Dashboard Mobile Enhancements */
+    .dashboard-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px;
+    }
+
+    .lifetime-brief {
+        font-size: 10px !important;
+    }
+
+    .eval-grid {
+        padding: 4px 0 !important;
+    }
+
+    .eval-lbl {
+        font-size: 9px !important;
+    }
+
+    .eval-num {
+        font-size: 18px !important;
+    }
+
+    /* Study list mobile overflow prevention */
+    .study-item {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .study-item-left {
+        min-width: 0;
+    }
+
+    .study-item-right {
+        flex: 1.2;
+        min-width: 0;
+        justify-content: flex-end;
+    }
+
+    .study-meaning {
+        font-size: 11.5px;
+        word-break: break-word;
+        max-width: 140px;
+    }
+
+    .study-korean-word {
+        font-size: 14.5px;
+    }
+
+    /* Dictionary mobile layout enhancements */
+    .dict-item {
+        padding: 10px 12px;
+    }
+
+    .dict-info {
+        min-width: 0;
+    }
+
+    .dict-meanings {
+        min-width: 0;
+        margin-right: 8px !important;
+    }
+
+    .dict-meaning {
+        font-size: 12.5px !important;
+        word-break: break-word;
+    }
+
+    .dict-meaning-sub {
+        font-size: 10px !important;
+        word-break: break-word;
+    }
+
+    .dict-korean {
+        font-size: 14.5px;
     }
 }
 
