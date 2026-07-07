@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOPIK I Vocabulary Game & Study</title>
+    <meta name="description" content="Aplikasi interaktif belajar kosakata bahasa Korea (TOPIK I) dengan pilihan ganda, daftar bacaan mandiri, kamus pencarian, dan simpan progres otomatis.">
+    <!-- Google Fonts: Poppins for clean premium look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Material Symbols for beautiful modern icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- HEADER / NAVIGATION -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="material-symbols-outlined logo-icon">menu_book</span>
+                <h1>TOPIK I <span class="accent-text">Quiz</span></h1>
+            </div>
+            <nav class="main-nav">
+                <button id="nav-lobby-btn" class="nav-btn active" onclick="app.showScreen('lobby')">
+                    <span class="material-symbols-outlined">home</span>
+                    <span class="nav-label">Menu</span>
+                </button>
+                <button id="nav-study-btn" class="nav-btn" onclick="app.initStudyMode()">
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span class="nav-label">Belajar</span>
+                </button>
+                <button id="nav-dictionary-btn" class="nav-btn" onclick="app.showScreen('dictionary')">
+                    <span class="material-symbols-outlined">search</span>
+                    <span class="nav-label">Kamus</span>
+                </button>
+            </nav>
+        </header>
+
+        <main class="app-main">
+            <!-- NOTIFIKASI RESUME PROGRESS -->
+            <div id="resume-toast" class="resume-card hidden">
+                <div class="resume-icon-wrapper">
+                    <span class="material-symbols-outlined">history</span>
+                </div>
+                <div class="resume-info">
+                    <h3>Kuis Belum Selesai</h3>
+                    <p id="resume-details">Anda memiliki progres kuis (12/50 kata). Ingin melanjutkan?</p>
+                </div>
+                <div class="resume-actions">
+                    <button class="btn btn-outline btn-sm" onclick="app.clearSavedProgress()">Mulai Baru</button>
+                    <button class="btn btn-primary btn-sm" onclick="app.resumeProgress()">Lanjutkan</button>
+                </div>
+            </div>
+
+            <!-- 1. LOBBY SCREEN -->
+            <section id="screen-lobby" class="screen active">
+                <div class="welcome-hero">
+                    <h2>Halo! Siap belajar bahasa Korea? 👋</h2>
+                    <p>Uji kemampuan Anda pada 1.671 kosakata penting TOPIK I melalui kuis pilihan ganda atau pelajari langsung daftarnya.</p>
+                </div>
+
+                <div class="stats-panel">
+                    <div class="stat-card">
+                        <span class="material-symbols-outlined stat-icon">emoji_events</span>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stats-total-correct">0</span>
+                            <span class="stat-label">Jawaban Benar</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="material-symbols-outlined stat-icon">task_alt</span>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stats-completed-blocks">0</span>
+                            <span class="stat-label">Blok Selesai</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setup-card card">
+                    <h3>Pengaturan Aktivitas</h3>
+                    
+                    <!-- Pilihan Jumlah Soal -->
+                    <div class="setup-group">
+                        <label class="setup-label">Jumlah Kata per Sesi:</label>
+                        <div class="toggle-group" id="size-toggles">
+                            <button class="toggle-btn active" data-size="25">25</button>
+                            <button class="toggle-btn" data-size="50">50</button>
+                            <button class="toggle-btn" data-size="100">100</button>
+                            <button class="toggle-btn" data-size="all">Semua (1.671)</button>
+                        </div>
+                    </div>
+
+                    <!-- Tipe Urutan Soal -->
+                    <div class="setup-group">
+                        <label class="setup-label">Mode Urutan:</label>
+                        <div class="toggle-group" id="order-toggles">
+                            <button class="toggle-btn active" data-order="sequential">Urut (Sequential)</button>
+                            <button class="toggle-btn" data-order="random">Acak (Random)</button>
+                        </div>
+                    </div>
+
+                    <!-- Pemilihan Blok Soal (Hanya muncul jika bukan "Semua" kata) -->
+                    <div class="setup-group" id="block-selection-group">
+                        <label class="setup-label">Pilih Barisan/Blok Kata:</label>
+                        <div class="block-grid" id="block-grid-container">
+                            <!-- JS will populate blocks here -->
+                        </div>
+                    </div>
+
+                    <!-- Tombol Utama Mulai -->
+                    <div class="lobby-actions">
+                        <button class="btn btn-primary btn-lg btn-full" id="start-quiz-btn" onclick="app.startQuiz()">
+                            <span class="material-symbols-outlined">play_arrow</span> Mulai Kuis Pilihan Ganda
+                        </button>
+                        <button class="btn btn-secondary btn-lg btn-full" id="start-study-btn" onclick="app.startStudyFromLobby()">
+                            <span class="material-symbols-outlined">menu_book</span> Baca Daftar Kata
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. QUIZ SCREEN -->
+            <section id="screen-quiz" class="screen">
+                <div class="quiz-header">
+                    <button class="btn-icon" onclick="app.confirmQuitQuiz()" title="Kembali ke Menu">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <div class="quiz-progress-text">
+                        Soal <span id="quiz-current-idx">1</span> dari <span id="quiz-total-questions">25</span>
+                    </div>
+                    <div class="quiz-score-badge">
+                        Skor: <span id="quiz-score">0</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="quiz-progress-bar" style="width: 0%"></div>
+                </div>
+
+                <!-- Word Card -->
+                <div class="word-card card">
+                    <div class="word-card-top">
+                        <span class="word-id" id="quiz-word-id">#123</span>
+                        <!-- Web Speech API Speaker Button -->
+                        <button class="btn-icon btn-speak" onclick="app.speakCurrentWord()" title="Dengarkan Pengucapan">
+                            <span class="material-symbols-outlined">volume_up</span>
+                        </button>
+                    </div>
+                    <div class="word-korean" id="quiz-word-korean">가게</div>
+                </div>
+
+                <p class="quiz-prompt">Pilih arti kata yang benar:</p>
+
+                <!-- Choice Grid -->
+                <div class="choices-grid" id="quiz-choices-container">
+                    <!-- Choice buttons generated by JS -->
+                </div>
+
+                <!-- Quiz Actions (Next button) -->
+                <div class="quiz-actions">
+                    <button class="btn btn-primary btn-lg btn-full hidden" id="quiz-next-btn" onclick="app.nextQuestion()">
+                        Lanjut <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 3. STUDY SCREEN (DAFTAR KATA) -->
+            <section id="screen-study" class="screen">
+                <div class="section-header">
+                    <h2>Belajar Kosakata 📖</h2>
+                    <p>Membaca dan melatih ingatan kosakata secara langsung.</p>
+                </div>
+
+                <div class="study-controls card">
+                    <div class="controls-row">
+                        <div class="control-item">
+                            <label class="control-label">Tampilkan Jumlah:</label>
+                            <select id="study-size-select" class="form-select" onchange="app.changeStudySize()">
+                                <option value="25" selected>25 Kata</option>
+                                <option value="50">50 Kata</option>
+                                <option value="100">100 Kata</option>
+                                <option value="all">Semua Kata (1.671)</option>
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label">Blok Kata:</label>
+                            <select id="study-block-select" class="form-select" onchange="app.loadStudyBlock()">
+                                <!-- Dynamically filled by JS -->
+                            </select>
+                        </div>
+                        <div class="control-item">
+                            <label class="control-label">Pencarian:</label>
+                            <div class="search-box">
+                                <span class="material-symbols-outlined search-icon">search</span>
+                                <input type="text" id="study-search-input" placeholder="Cari di blok ini..." oninput="app.filterStudyList()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="controls-row justify-between align-center">
+                        <div class="toggle-switch-wrapper">
+                            <label class="switch">
+                                <input type="checkbox" id="study-hide-meanings-toggle" onchange="app.toggleHideMeanings()">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="toggle-label">Sembunyikan Arti Kata</span>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="app.markCurrentBlockCompleted()">
+                            <span class="material-symbols-outlined">check_circle</span> Tandai Blok Selesai
+                        </button>
+                    </div>
+                </div>
+
+                <div class="study-list" id="study-list-container">
+                    <!-- Words list generated by JS -->
+                </div>
+            </section>
+
+            <!-- 4. RESULTS SCREEN -->
+            <section id="screen-results" class="screen">
+                <div class="results-card card text-center">
+                    <span class="material-symbols-outlined results-trophy" id="results-icon">emoji_events</span>
+                    <h2 id="results-headline">Luar Biasa! 🎉</h2>
+                    <p id="results-sub">Anda telah menyelesaikan sesi kuis kosakata TOPIK I.</p>
+
+                    <div class="score-circle-wrapper">
+                        <div class="score-circle">
+                            <span class="score-percentage" id="results-percentage">100%</span>
+                            <span class="score-fraction" id="results-fraction">25/25 Benar</span>
+                        </div>
+                    </div>
+
+                    <div class="results-stats">
+                        <div class="result-stat-item">
+                            <span class="result-stat-val" id="results-duration">0m 45s</span>
+                            <span class="result-stat-lbl">Waktu Belajar</span>
+                        </div>
+                        <div class="result-stat-item">
+                            <span class="result-stat-val text-success" id="results-correct-count">25</span>
+                            <span class="result-stat-lbl">Benar</span>
+                        </div>
+                        <div class="result-stat-item">
+                            <span class="result-stat-val text-error" id="results-wrong-count">0</span>
+                            <span class="result-stat-lbl">Salah</span>
+                        </div>
+                    </div>
+
+                    <div class="results-actions">
+                        <button class="btn btn-primary" onclick="app.retryCurrentQuiz()">
+                            <span class="material-symbols-outlined">replay</span> Ulangi Kuis
+                        </button>
+                        <button class="btn btn-outline" onclick="app.showScreen('lobby')">
+                            <span class="material-symbols-outlined">home</span> Menu Utama
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Review Jawaban Salah -->
+                <div class="review-panel card hidden" id="results-review-panel">
+                    <h3>Tinjau Jawaban Salah ✏️</h3>
+                    <p>Materi di bawah ini perlu Anda pelajari kembali:</p>
+                    <div class="review-list" id="results-review-list">
+                        <!-- Incorrect answers will be rendered here by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. DICTIONARY SCREEN -->
+            <section id="screen-dictionary" class="screen">
+                <div class="section-header">
+                    <h2>Kamus Kosakata TOPIK I 🔍</h2>
+                    <p>Cari arti dan dengarkan pengucapan seluruh 1.671 kata dasar bahasa Korea.</p>
+                </div>
+
+                <div class="dictionary-search card">
+                    <div class="search-box lg">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" id="dict-search-input" placeholder="Cari Hangeul, bahasa Inggris, atau No. kata (misal: 가게, store, 1)..." oninput="app.searchDictionary()">
+                        <button id="dict-clear-btn" class="btn-clear hidden" onclick="app.clearDictionarySearch()">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="search-info">
+                        Menampilkan <span id="dict-results-count">1.671</span> dari 1.671 kosakata.
+                    </div>
+                </div>
+
+                <!-- Dictionary Words Grid/List -->
+                <div class="dictionary-list" id="dict-list-container">
+                    <!-- Word rows populated by JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Load Vocabulary Database first, then game app scripts -->
+    <script src="words.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
