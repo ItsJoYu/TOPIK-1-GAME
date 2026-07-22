@@ -287,6 +287,12 @@ class TopikApp {
                 btn.classList.add('active');
                 this.stats.quizLanguage = btn.dataset.lang;
                 this.saveStats();
+
+                // Instantly update Dictionary and Study lists in the background
+                if (this.studyWords) {
+                    this.renderStudyList(this.studyWords);
+                }
+                this.initDictionary();
             });
         });
     }
@@ -398,6 +404,13 @@ class TopikApp {
         this.stats.quizLanguage = lang;
         this.saveStats();
         this.syncQuizLangPills();
+
+        // Update Dictionary and Study lists in the background
+        if (this.studyWords) {
+            this.renderStudyList(this.studyWords);
+        }
+        this.initDictionary();
+
         this.renderQuestion();
     }
 
