@@ -25,6 +25,7 @@ class TopikApp {
 
         // Active Study State
         this.hideStudyMeanings = false;
+        this.currentChoicesWords = null; // Stores choice words for current question to prevent re-shuffling on language change
         
         // Lifetime Stats (loaded from localStorage)
         this.stats = {
@@ -205,6 +206,7 @@ class TopikApp {
             this.quizSize = session.quizSize;
             this.quizOrder = session.quizOrder;
             this.activeBlockIndex = session.activeBlockIndex;
+            this.currentChoicesWords = null;
 
             // Hide the resume card toast
             document.getElementById('resume-toast').classList.add('hidden');
@@ -372,6 +374,7 @@ class TopikApp {
         this.score = 0;
         this.mistakenWords = [];
         this.startTime = Date.now();
+        this.currentChoicesWords = null;
         
         // Save initial progress
         this.saveCurrentQuizSession();
@@ -436,8 +439,13 @@ class TopikApp {
         document.getElementById('quiz-word-id').innerText = `#${currentWord.id}`;
         document.getElementById('quiz-word-korean').innerText = currentWord.korean;
         
-        // Generate options (1 correct, 3 distractors)
-        const choices = this.generateChoices(currentWord);
+        // Generate choices words if not already generated for current question
+        if (!this.currentChoicesWords) {
+            this.currentChoicesWords = this.generateChoicesWords(currentWord);
+        }
+        
+        const targetLang = this.stats.quizLanguage || 'indonesian';
+        const choices = this.currentChoicesWords.map(w => w[targetLang]);
         
         // Render choice buttons
         const choicesContainer = document.getElementById('quiz-choices-container');
@@ -464,21 +472,18 @@ class TopikApp {
     }
 
     /**
-     * Create 4 unique choices: 1 correct + 3 random translations
+     * Create 4 unique choice word objects: 1 correct + 3 random distractor words
      */
-    generateChoices(correctWord) {
-        const targetLang = this.stats.quizLanguage || 'indonesian';
-        const correctVal = correctWord[targetLang];
-        const choices = [correctVal];
+    generateChoicesWords(correctWord) {
+        const choices = [correctWord];
         
         // Grab incorrect options (distractors)
         while (choices.length < 4) {
             const randomWord = this.words[Math.floor(Math.random() * this.words.length)];
-            const randomVal = randomWord[targetLang];
             
-            // Prevent duplicate meaning or matching correct word
-            if (randomVal !== correctVal && !choices.includes(randomVal)) {
-                choices.push(randomVal);
+            // Prevent duplicate words by ID
+            if (randomWord.id !== correctWord.id && !choices.some(w => w.id === randomWord.id)) {
+                choices.push(randomWord);
             }
         }
         
@@ -558,6 +563,7 @@ class TopikApp {
      */
     nextQuestion() {
         this.currentIndex++;
+        this.currentChoicesWords = null;
         
         if (this.currentIndex < this.quizWords.length) {
             this.saveCurrentQuizSession();

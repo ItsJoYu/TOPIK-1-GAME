@@ -919,6 +919,7 @@ input:checked + .slider:before {
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;
+    min-width: 0; /* Prevent horizontal overflow in grid cell */
 }
 
 .study-meaning.hidden-meaning {
