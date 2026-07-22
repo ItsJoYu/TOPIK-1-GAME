@@ -179,9 +179,33 @@ function cleanTranslation(text) {
     return unique.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ');
 }
 
+// Preserve existing Japanese translations from current words.js if available
+const koreanToJapanese = {};
+if (fs.existsSync(outputPath)) {
+    try {
+        let existingContent = fs.readFileSync(outputPath, 'utf8');
+        existingContent = existingContent.replace(/^\/\/.*$/m, '');
+        existingContent = existingContent.replace('window.TOPIK_WORDS =', '');
+        existingContent = existingContent.trim();
+        if (existingContent.endsWith(';')) existingContent = existingContent.slice(0, -1);
+        const existingWords = JSON.parse(existingContent);
+        existingWords.forEach(w => {
+            if (w.korean && w.japanese) {
+                koreanToJapanese[w.korean] = w.japanese;
+            }
+        });
+        console.log(`Preserved ${Object.keys(koreanToJapanese).length} Japanese translations from existing words.js.`);
+    } catch (e) {
+        console.warn('Could not parse existing words.js for Japanese preservation:', e.message);
+    }
+}
+
 // Map over baseWords, checking if we have curated Indonesian.
 const needTranslation = [];
 baseWords.forEach((word, idx) => {
+    // Preserve Japanese
+    word.japanese = koreanToJapanese[word.korean] || '';
+
     if (koreanToIndonesian[word.korean]) {
         word.indonesian = cleanTranslation(koreanToIndonesian[word.korean]);
     } else {
@@ -247,7 +271,7 @@ function translateSliceSequentially(slice, idx, onComplete) {
 
 function saveDatabase() {
     baseWords.sort((a, b) => a.id - b.id);
-    const fileContent = `// Automatically generated with Indonesian translations. Do not edit directly.
+    const fileContent = `// Automatically generated with Indonesian and Japanese translations. Do not edit directly.
 window.TOPIK_WORDS = ${JSON.stringify(baseWords, null, 2)};
 `;
     fs.writeFileSync(outputPath, fileContent, 'utf8');

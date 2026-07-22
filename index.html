@@ -116,6 +116,16 @@
                         </div>
                     </div>
 
+                    <!-- Pilihan Bahasa Kuis -->
+                    <div class="setup-group">
+                        <label class="setup-label">Bahasa Kuis / Aktivitas:</label>
+                        <div class="toggle-group" id="language-toggles">
+                            <button class="toggle-btn active" data-lang="indonesian">Indonesia</button>
+                            <button class="toggle-btn" data-lang="english">Inggris</button>
+                            <button class="toggle-btn" data-lang="japanese">Jepang</button>
+                        </div>
+                    </div>
+
                     <!-- Pemilihan Blok Soal (Hanya muncul jika bukan "Semua" kata) -->
                     <div class="setup-group" id="block-selection-group">
                         <label class="setup-label">Pilih Barisan/Blok Kata:</label>
@@ -165,6 +175,13 @@
                         </button>
                     </div>
                     <div class="word-korean" id="quiz-word-korean">가게</div>
+                </div>
+
+                <!-- Language Switcher Mid-Quiz -->
+                <div class="quiz-lang-switcher">
+                    <button class="lang-pill active" id="quiz-lang-btn-indonesian" onclick="app.setQuizLanguageMidQuiz('indonesian')">ID</button>
+                    <button class="lang-pill" id="quiz-lang-btn-english" onclick="app.setQuizLanguageMidQuiz('english')">EN</button>
+                    <button class="lang-pill" id="quiz-lang-btn-japanese" onclick="app.setQuizLanguageMidQuiz('japanese')">JA</button>
                 </div>
 
                 <p class="quiz-prompt">Pilih arti kata yang benar:</p>

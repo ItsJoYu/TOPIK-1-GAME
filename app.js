@@ -31,7 +31,8 @@ class TopikApp {
             totalCorrect: 0,
             completedBlocks: [], // list of completed block identifiers (e.g. "size_50_block_2")
             wrongWordIds: [], // list of word IDs that user got wrong in past quizzes
-            correctWordIds: [] // list of word IDs that user got right in past quizzes
+            correctWordIds: [], // list of word IDs that user got right in past quizzes
+            quizLanguage: 'indonesian' // selected language for quiz (indonesian, english, japanese)
         };
     }
 
@@ -46,6 +47,16 @@ class TopikApp {
 
         // Setup Lobby UI listeners
         this.setupLobbyListeners();
+        
+        // Sync active state of language buttons in lobby
+        const activeLang = this.stats.quizLanguage || 'indonesian';
+        document.querySelectorAll('#language-toggles .toggle-btn').forEach(b => {
+            if (b.dataset.lang === activeLang) {
+                b.classList.add('active');
+            } else {
+                b.classList.remove('active');
+            }
+        });
         
         // Initialize block list for the default size
         this.generateLobbyBlocks();
@@ -268,6 +279,16 @@ class TopikApp {
                 this.quizOrder = btn.dataset.order;
             });
         });
+
+        // Language buttons
+        document.querySelectorAll('#language-toggles .toggle-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('#language-toggles .toggle-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.stats.quizLanguage = btn.dataset.lang;
+                this.saveStats();
+            });
+        });
     }
 
     /**
@@ -355,10 +376,37 @@ class TopikApp {
     }
 
     /**
+     * Synchronize the mid-quiz language switcher pills active state
+     */
+    syncQuizLangPills() {
+        const lang = this.stats.quizLanguage || 'indonesian';
+        document.querySelectorAll('.quiz-lang-switcher .lang-pill').forEach(pill => {
+            pill.classList.remove('active');
+        });
+        const activePill = document.getElementById(`quiz-lang-btn-${lang}`);
+        if (activePill) {
+            activePill.classList.add('active');
+        }
+    }
+
+    /**
+     * Switch quiz language mid-game and re-render question options immediately
+     */
+    setQuizLanguageMidQuiz(lang) {
+        if (!this.isAnsweringAllowed) return; // Prevent changing language after they've clicked an answer
+        
+        this.stats.quizLanguage = lang;
+        this.saveStats();
+        this.syncQuizLangPills();
+        this.renderQuestion();
+    }
+
+    /**
      * Render the current question
      */
     renderQuestion() {
         this.isAnsweringAllowed = true;
+        this.syncQuizLangPills();
         
         const currentWord = this.quizWords[this.currentIndex];
         
@@ -406,15 +454,18 @@ class TopikApp {
      * Create 4 unique choices: 1 correct + 3 random translations
      */
     generateChoices(correctWord) {
-        const choices = [correctWord.indonesian];
+        const targetLang = this.stats.quizLanguage || 'indonesian';
+        const correctVal = correctWord[targetLang];
+        const choices = [correctVal];
         
         // Grab incorrect options (distractors)
         while (choices.length < 4) {
             const randomWord = this.words[Math.floor(Math.random() * this.words.length)];
+            const randomVal = randomWord[targetLang];
             
             // Prevent duplicate meaning or matching correct word
-            if (randomWord.indonesian !== correctWord.indonesian && !choices.includes(randomWord.indonesian)) {
-                choices.push(randomWord.indonesian);
+            if (randomVal !== correctVal && !choices.includes(randomVal)) {
+                choices.push(randomVal);
             }
         }
         
@@ -430,7 +481,8 @@ class TopikApp {
         if (!this.isAnsweringAllowed) return;
         this.isAnsweringAllowed = false;
         
-        const isCorrect = (chosenMeaning === correctWord.indonesian);
+        const targetLang = this.stats.quizLanguage || 'indonesian';
+        const isCorrect = (chosenMeaning === correctWord[targetLang]);
         const choicesContainer = document.getElementById('quiz-choices-container');
         const buttons = choicesContainer.querySelectorAll('.choice-btn');
         
@@ -462,7 +514,7 @@ class TopikApp {
             // Find and highlight the correct button in green
             buttons.forEach(btn => {
                 const textDiv = btn.querySelector('.choice-text');
-                if (textDiv && textDiv.innerText === correctWord.indonesian) {
+                if (textDiv && textDiv.innerText === correctWord[targetLang]) {
                     btn.classList.add('correct');
                 }
             });
@@ -581,13 +633,24 @@ class TopikApp {
             this.mistakenWords.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'review-item';
+                
+                const targetLang = this.stats.quizLanguage || 'indonesian';
+                const correctMeaning = item.word[targetLang];
+                
+                // Show other translations in small text
+                const otherLangs = [];
+                if (targetLang !== 'indonesian') otherLangs.push(`ID: ${item.word.indonesian}`);
+                if (targetLang !== 'english') otherLangs.push(`EN: ${item.word.english}`);
+                if (targetLang !== 'japanese') otherLangs.push(`JP: ${item.word.japanese}`);
+                const extraSub = otherLangs.join(' | ');
+
                 card.innerHTML = `
                     <div class="review-item-word">
                         <span class="korean">${item.word.korean}</span>
-                        <span class="correct-label">${item.word.indonesian} <small style="opacity: 0.7; font-size: 11px;">(${item.word.english})</small></span>
+                        <span class="correct-label">${this.escapeHTML(correctMeaning)} <small style="opacity: 0.7; font-size: 11px;">(${this.escapeHTML(extraSub)})</small></span>
                     </div>
                     <div class="review-item-choice">
-                        Jawaban Anda: <span class="text-error">${item.userChoice}</span>
+                        Jawaban Anda: <span class="text-error">${this.escapeHTML(item.userChoice)}</span>
                     </div>
                 `;
                 reviewListContainer.appendChild(card);
@@ -725,6 +788,18 @@ class TopikApp {
     }
 
     /**
+     * Get the subtext for secondary translations
+     */
+    getSecondaryMeaningsText(word) {
+        const currentLang = this.stats.quizLanguage || 'indonesian';
+        const parts = [];
+        if (currentLang !== 'indonesian') parts.push(`ID: ${word.indonesian}`);
+        if (currentLang !== 'english') parts.push(`EN: ${word.english}`);
+        if (currentLang !== 'japanese') parts.push(`JP: ${word.japanese}`);
+        return parts.join(' | ');
+    }
+
+    /**
      * Render lists of vocabulary items for study
      */
     renderStudyList(wordsList) {
@@ -741,20 +816,21 @@ class TopikApp {
             item.className = 'study-item';
             
             const meaningClass = this.hideStudyMeanings ? 'study-meaning hidden-meaning' : 'study-meaning';
-            
+            const primaryVal = word[this.stats.quizLanguage || 'indonesian'];
+            const secondaryVal = this.getSecondaryMeaningsText(word);
+
             item.innerHTML = `
-                <div class="study-item-left">
-                    <span class="study-num">#${word.id}</span>
-                    <span class="study-korean-word">${word.korean}</span>
-                </div>
-                <div class="study-item-right">
-                    <div class="${meaningClass}" onclick="app.toggleIndividualStudyMeaning(this)">
-                        ${word.indonesian} <span class="study-english-sub" style="font-size: 11px; opacity: 0.65; display: block;">(${word.english})</span>
+                <span class="study-num">#${word.id}</span>
+                <span class="study-korean-word">${word.korean}</span>
+                <div class="${meaningClass}" onclick="app.toggleIndividualStudyMeaning(this)">
+                    <div class="meaning-primary" style="font-weight: 500;">${this.escapeHTML(primaryVal)}</div>
+                    <div class="meaning-secondary" style="font-size: 11px; opacity: 0.65; margin-top: 2px;">
+                        (${this.escapeHTML(secondaryVal)})
                     </div>
-                    <button class="btn-icon btn-speak" onclick="app.speakWord('${word.korean}')" title="Dengarkan Pengucapan">
-                        <span class="material-symbols-outlined" style="font-size: 18px;">volume_up</span>
-                    </button>
                 </div>
+                <button class="btn-icon btn-speak" onclick="app.speakWord('${word.korean}')" title="Dengarkan Pengucapan">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">volume_up</span>
+                </button>
             `;
             container.appendChild(item);
         });
@@ -774,6 +850,7 @@ class TopikApp {
             return w.korean.includes(query) || 
                    w.indonesian.toLowerCase().includes(query) ||
                    w.english.toLowerCase().includes(query) || 
+                   w.japanese.toLowerCase().includes(query) || 
                    w.id.toString() === query;
         });
 
@@ -860,11 +937,12 @@ class TopikApp {
 
         clearBtn.classList.remove('hidden');
 
-        // Search match ID, Korean, or English/Indonesian translation
+        // Search match ID, Korean, or English/Indonesian/Japanese translation
         const filtered = this.words.filter(w => {
             return w.korean.includes(query) || 
                    w.indonesian.toLowerCase().includes(query) ||
                    w.english.toLowerCase().includes(query) || 
+                   w.japanese.toLowerCase().includes(query) || 
                    w.id.toString() === query;
         });
 
@@ -892,14 +970,18 @@ class TopikApp {
         wordsList.forEach(word => {
             const item = document.createElement('div');
             item.className = 'dict-item';
+            
+            const primaryVal = word[this.stats.quizLanguage || 'indonesian'];
+            const secondaryVal = this.getSecondaryMeaningsText(word);
+
             item.innerHTML = `
-                <div class="dict-info">
-                    <span class="dict-num">#${word.id}</span>
-                    <span class="dict-korean">${word.korean}</span>
-                </div>
-                <div class="dict-meanings" style="text-align: right; flex: 1; margin-right: 12px;">
-                    <div class="dict-meaning" style="font-weight: 500; font-size: 14px;">${word.indonesian}</div>
-                    <div class="dict-meaning-sub" style="font-size: 11px; color: var(--text-muted);">${word.english}</div>
+                <span class="dict-num">#${word.id}</span>
+                <span class="dict-korean">${word.korean}</span>
+                <div class="dict-meanings" style="text-align: right; margin-right: 8px;">
+                    <div class="dict-meaning" style="font-weight: 500; font-size: 13px;">${this.escapeHTML(primaryVal)}</div>
+                    <div class="dict-meaning-sub" style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                        (${this.escapeHTML(secondaryVal)})
+                    </div>
                 </div>
                 <button class="btn-icon btn-speak" onclick="app.speakWord('${word.korean}')" title="Dengarkan Pengucapan">
                     <span class="material-symbols-outlined" style="font-size: 18px;">volume_up</span>
