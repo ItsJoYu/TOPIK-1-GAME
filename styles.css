@@ -853,7 +853,7 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: calc(100vh - 280px);
+    /* max-height: calc(100vh - 280px); */
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -864,22 +864,15 @@ input:checked + .slider:before {
     border-radius: var(--radius-sm);
     padding: 10px 16px;
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: 40px 120px 1fr auto;
     gap: 12px;
-    align-items: stretch; /* Stretch to let height calculate correctly */
+    align-items: center;
     transition: var(--transition-smooth);
-    min-height: 48px;
+    min-height: 52px;
 }
 
 .study-item:hover {
     background-color: var(--bg-card-hover);
-}
-
-.study-item-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0; /* Do not shrink Hangul or ID */
 }
 
 .study-num {
@@ -887,7 +880,6 @@ input:checked + .slider:before {
     color: var(--text-muted);
     font-family: var(--font-heading);
     font-weight: 600;
-    width: 32px;
 }
 
 .study-korean-word {
@@ -896,15 +888,6 @@ input:checked + .slider:before {
     font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap; /* Do not wrap Hangul word */
-}
-
-.study-item-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1; /* Take remaining space */
-    min-width: 0;
-    justify-content: flex-end;
 }
 
 .study-meaning {
@@ -1141,21 +1124,15 @@ input:checked + .slider:before {
     border-radius: var(--radius-sm);
     padding: 10px 16px;
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: 40px 120px 1fr auto;
     gap: 12px;
-    align-items: stretch; /* Stretch to let height calculate correctly */
+    align-items: center;
     transition: var(--transition-smooth);
+    min-height: 52px;
 }
 
 .dict-item:hover {
     background-color: var(--bg-card-hover);
-}
-
-.dict-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0; /* Do not shrink Hangul or ID */
 }
 
 .dict-num {
@@ -1163,7 +1140,6 @@ input:checked + .slider:before {
     color: var(--text-muted);
     font-family: var(--font-heading);
     font-weight: 600;
-    width: 32px;
 }
 
 .dict-korean {
@@ -1198,16 +1174,6 @@ input:checked + .slider:before {
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;
-}
-
-/* Align grid items vertically inside stretched cards */
-.study-num,
-.study-korean-word,
-.dict-num,
-.dict-korean,
-.study-item .btn-speak,
-.dict-item .btn-speak {
-    align-self: center;
 }
 
 .dict-actions {
@@ -1314,47 +1280,36 @@ input:checked + .slider:before {
         font-size: 18px !important;
     }
 
-    /* Study list mobile overflow prevention */
-    .study-item {
-        padding: 10px 12px;
+    /* Study and Dictionary list mobile layout */
+    .study-item, .dict-item {
+        grid-template-columns: 32px 70px 1fr auto;
         gap: 8px;
-        grid-template-columns: auto auto 1fr auto;
-        align-items: stretch;
+        padding: 8px 10px;
+        min-height: 48px;
+        align-items: center;
+    }
+
+    .study-num, .dict-num {
+        font-size: 10px;
+    }
+
+    .study-korean-word, .dict-korean {
+        font-size: 14.5px;
     }
 
     .study-meaning {
         font-size: 11.5px;
-        word-break: break-word;
-    }
-
-    .study-korean-word {
-        font-size: 14.5px;
-    }
-
-    /* Dictionary mobile layout enhancements */
-    .dict-item {
-        padding: 10px 12px;
-        gap: 8px;
-        grid-template-columns: auto auto 1fr auto;
-        align-items: stretch;
-    }
-
-    .dict-meanings {
-        margin-right: 4px !important;
     }
 
     .dict-meaning {
-        font-size: 12px !important;
+        font-size: 11.5px;
         word-break: break-word;
     }
 
     .dict-meaning-sub {
-        font-size: 10px !important;
+        font-size: 9.5px;
+        margin-top: 1px;
         word-break: break-word;
-    }
-
-    .dict-korean {
-        font-size: 14.5px;
     }
 }
 
